@@ -434,9 +434,9 @@ const FINS=[{id:'color',name:'カラー'},{id:'mono',name:'モノクロ'}];
    (picks = seconds of the 4 recommended stills, bundled as picks/<id>-<n>.jpg; null = a still supplied by SAMANSA, not from the trailer): c = copyright line (fixed per work; '' = not registered yet → nothing printed), col = text colour, v = bundled trailer */
 const WORKS=[
   {id:'curfew',t:'リッチーとの1日',o:'Curfew',c:'©Curfew',v:'trailers/curfew.mp4',picks:[null,null,null,23.4]},
+  {id:'strange',t:'ストレンジ',o:'Strange',c:'©Strange',v:'trailers/strange.mp4',picks:[null,null,null,null]},
   {id:'sandwitch',t:'もう一度ここで',o:'The Second Time Around',c:'©The Second Time Around',v:'trailers/sandwitch.mp4',picks:[0.9,null,6.7,null]},
   {id:'stilldark',t:'still dark',c:'©still dark',v:'trailers/stilldark.mp4',picks:[null,null,null,null]},
-  {id:'strange',t:'ストレンジ',o:'Strange',c:'©Strange',v:'trailers/strange.mp4',picks:[null,null,null,null]},
   {id:'dishpit',t:'皿洗い',o:'Dish Pit',c:'©Dish Pit',v:'trailers/dishpit.mp4',picks:[4.1,5.0,13.8,25.9]}
 ];
 const work=()=>WORKS.find(w=>w.id===P.work);
