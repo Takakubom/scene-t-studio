@@ -218,6 +218,7 @@ dialog::backdrop{background:rgba(0,0,0,.6)}
 .mdlg{max-width:min(92vw,620px)}.mdlg img{max-height:78vh;object-fit:contain}
 .osum{margin:14px 0 0;display:grid;grid-template-columns:auto 1fr;gap:6px 16px;font-size:13px}.osum dt{color:var(--mute)}.osum dd{margin:0;overflow-wrap:anywhere}
 .qty{display:flex;align-items:center;gap:8px;margin-top:14px;font-size:13px}.qty span{color:var(--mute);margin-right:auto}.qty .btn{width:44px;padding:0}.qty output{min-width:2em;text-align:center;font-size:15px}
+.adj .row{margin-top:6px;grid-template-columns:5.8em minmax(0,1fr) 3.4em}.adj .row span{white-space:nowrap}.adj[open] summary{color:var(--ink)}
 .more{margin-top:14px;font-size:12px;color:var(--mute)}.more summary{cursor:pointer;min-height:32px;display:flex;align-items:center}
 .dlg{padding:18px}.dlg img{width:100%;display:block;background:#c4c4c4}
 .dlg .pr img{max-height:180px;object-fit:contain}
@@ -337,6 +338,12 @@ html.locked #gate{display:grid;position:fixed;inset:0;z-index:1000;place-items:c
       <div class="sub">透明度（不透明度）</div>
       <div class="row"><span>濃さ</span><input type="range" id="op" min="70" max="100" step="1" aria-label="プリントの不透明度（%）"><output id="opv"></output></div>
       <p class="note" style="margin-top:2px">標準は85%。下げるほどボディの色が透けます</p>
+      <details class="more adj" id="adjbox"><summary>もっと調整する</summary>
+        <div class="row"><span>明るさ</span><input type="range" id="br" min="-50" max="50" step="1" aria-label="明るさ"><output id="brv"></output></div>
+        <div class="row"><span>コントラスト</span><input type="range" id="ct" min="-50" max="50" step="1" aria-label="コントラスト"><output id="ctv"></output></div>
+        <div class="row"><span>彩度</span><input type="range" id="sat" min="-50" max="50" step="1" aria-label="彩度"><output id="satv"></output></div>
+        <button class="link" id="adjreset" style="min-height:0;padding:4px 0 0">調整を元に戻す</button>
+      </details>
       <label class="f" style="margin-top:16px">コピーライトの文字色
         <span class="opts" id="capc"></span></label>
       <div class="pickc"><label for="capcolor">好きな色を指定</label><input type="color" class="swatch" id="capcolor" aria-label="コピーライトの色を指定"><input class="in hex" id="caphex" maxlength="7" spellcheck="false" autocomplete="off" aria-label="カラーコード（#RRGGBB）"></div>
@@ -439,7 +446,7 @@ const WORKS=[
   {id:'dishpit',t:'皿洗い',o:'Dish Pit',c:'©Dish Pit',v:'trailers/dishpit.mp4',picks:[4.1,5.0,13.8,25.9]}
 ];
 const work=()=>WORKS.find(w=>w.id===P.work);
-const DEF={item:'long',color:'white',slot:'L',ratio:'169',size:28,sv:2,neck:8,zoom:100,px:50,py:50,trim:true,fin:'color',op:85,opv:5,ccv:2,cv:2,rv:2,work:'curfew',mode:'pick',capColor:'',tsize:'M'};
+const DEF={item:'long',color:'white',slot:'L',ratio:'169',size:28,sv:2,neck:8,zoom:100,px:50,py:50,trim:true,fin:'color',op:85,opv:5,ccv:2,cv:2,rv:2,work:'curfew',mode:'pick',capColor:'',tsize:'M',br:0,ct:0,sat:0};
 /* the letterbox trim is no longer a choice: it is always on */
 let P={...DEF};
 try{const v=JSON.parse(localStorage.getItem('photot-studio'));if(v&&typeof v==='object'){for(const k in DEF)if(typeof v[k]===typeof DEF[k])P[k]=v[k];
@@ -497,6 +504,15 @@ function cropRect(sc){
 }
 
 /* ---------- print composition ---------- */
+/* もっと調整する: brightness, contrast and saturation, each −50…+50 (0 = untouched), applied to the cropped scene before the finish */
+function adjust(g,x,y,w,h){
+  if(!(P.br||P.ct||P.sat))return;
+  const im=g.getImageData(x,y,w,h),d=im.data,b=P.br*1.6,c=1+P.ct/62.5,s=1+P.sat/50;
+  for(let i=0;i<d.length;i+=4){let r=d[i],gg=d[i+1],bb=d[i+2];const l=r*.299+gg*.587+bb*.114;
+    r=l+(r-l)*s;gg=l+(gg-l)*s;bb=l+(bb-l)*s;
+    d[i]=(r-128)*c+128+b;d[i+1]=(gg-128)*c+128+b;d[i+2]=(bb-128)*c+128+b}
+  g.putImageData(im,x,y);
+}
 function tone(g,x,y,w,h){
   const im=g.getImageData(x,y,w,h),d=im.data;
   for(let i=0;i<d.length;i+=4){const l=clamp(((d[i]*.3+d[i+1]*.59+d[i+2]*.11)/255-.5)*1.12+.5,0,1)*255;d[i]=d[i+1]=d[i+2]=l}
@@ -510,6 +526,7 @@ function makePrint(sc,IW){
   const g=cv.getContext('2d');
   g.imageSmoothingEnabled=true;g.imageSmoothingQuality='high';
   g.drawImage(sc.cv,c.x,c.y,c.w,c.h,0,0,IW,IH);
+  adjust(g,0,0,IW,IH);
   if(P.fin==='mono')tone(g,0,0,IW,IH);
   if(C){g.fillStyle=ink();g.textBaseline='alphabetic';g.font=`500 ${cs}px ${CAPFONT}`;
     if('letterSpacing' in g)g.letterSpacing='0px';
@@ -571,7 +588,7 @@ function render(){
   draw();
 }
 function draw(){
-  for(const k of ['size','neck','op','zoom','px','py'])$('#'+k).value=P[k];$('#neckv').textContent=P.neck+'cm';$('#neckdef').hidden=P.neck===NECK_STD;
+  for(const k of ['size','neck','op','zoom','px','py','br','ct','sat'])$('#'+k).value=P[k];{const sg=v=>(v>0?'+':'')+v;$('#brv').textContent=sg(P.br);$('#ctv').textContent=sg(P.ct);$('#satv').textContent=sg(P.sat);$('#adjreset').hidden=!(P.br||P.ct||P.sat)}$('#neckv').textContent=P.neck+'cm';$('#neckdef').hidden=P.neck===NECK_STD;
   $('#zoomv').textContent=P.zoom+'%';$('#opv').textContent=P.op+'%';$('#print').style.opacity=P.op/100;$('#sizev').textContent=Math.round(slot().w*CM*2)/2+'cm';$('#sizenote').textContent=`${sizeTxt()}・首元から${P.neck}cm（標準${NECK_STD}cm）。ロンT Mサイズ（身幅52cm）を基準にした目安です。`;$('#pxv').textContent=P.px;$('#pyv').textContent=P.py;
   const s=slot(),pr=$('#print'),gh=$('#ghost'),sc=scenes[sel];
   const pos=el=>{el.style.left=(TOX+(s.cx-s.w/2)*TS)/W*100+'%';el.style.top=(TOY+s.top*TS)/H*100+'%';el.style.width=s.w*TS/W*100+'%'};
@@ -581,8 +598,8 @@ function draw(){
   save();
 }
 let qty=1;
-const orderRows=()=>{const sc=scenes[sel],w=work();return [['作品',w?w.t:'—'],['アイテム',item()],['サイズ',P.tsize],['シーン',sc?(sc.t==null?'おすすめ':tc(sc.t)):'—'],['プリント',`センター・${sizeTxt()}・首元から${P.neck}cm・${ratio().name}`],['仕上げ',`${FINS.find(f=>f.id===P.fin).name}・濃さ${P.op}%`],['コピーライト',credit()||'なし']]};
-const summary=()=>{const sc=scenes[sel],s=slot();return [item(),`シーン：${sc?sc.name+(sc.t==null?'':' '+tc(sc.t)):'なし'}`,`位置：${s.name}・首元から${P.neck}cm・${sizeTxt()}`,`トリミング：${ratio().name}・拡大${P.zoom}%・横${P.px}・縦${P.py}`,`仕上げ：${FINS.find(f=>f.id===P.fin).name}・不透明度${P.op}%`,`コピーライト：${credit()?credit()+'（'+'右下'+'）':'なし'}`,`文字色：${ink().toUpperCase()}`].join('\n')};
+const orderRows=()=>{const sc=scenes[sel],w=work();return [['作品',w?w.t:'—'],['アイテム',item()],['サイズ',P.tsize],['シーン',sc?(sc.t==null?'おすすめ':tc(sc.t)):'—'],['プリント',`センター・${sizeTxt()}・首元から${P.neck}cm・${ratio().name}`],['仕上げ',`${FINS.find(f=>f.id===P.fin).name}・濃さ${P.op}%${P.br||P.ct||P.sat?`・明るさ${P.br}・コントラスト${P.ct}・彩度${P.sat}`:''}`],['コピーライト',credit()||'なし']]};
+const summary=()=>{const sc=scenes[sel],s=slot();return [item(),`シーン：${sc?sc.name+(sc.t==null?'':' '+tc(sc.t)):'なし'}`,`位置：${s.name}・首元から${P.neck}cm・${sizeTxt()}`,`トリミング：${ratio().name}・拡大${P.zoom}%・横${P.px}・縦${P.py}`,`仕上げ：${FINS.find(f=>f.id===P.fin).name}・不透明度${P.op}%${P.br||P.ct||P.sat?`・明るさ${P.br}・コントラスト${P.ct}・彩度${P.sat}`:''}`,`コピーライト：${credit()?credit()+'（'+'右下'+'）':'なし'}`,`文字色：${ink().toUpperCase()}`].join('\n')};
 
 /* ---------- events ---------- */
 const on=(sel,attr,fn)=>$(sel).addEventListener('click',e=>{const b=e.target.closest(`[${attr}]`);if(b)fn(b.getAttribute(attr))});
@@ -595,7 +612,8 @@ $('#capc').addEventListener('click',e=>{const b=e.target.closest('[data-cc]');if
 $('#caphex').addEventListener('input',e=>{let v=e.target.value.trim();if(v&&v[0]!=='#')v='#'+v;if(/^#[0-9a-f]{6}$/i.test(v)){P.capColor=v.toLowerCase();render()}});
 $('#capcolor').addEventListener('input',e=>{P.capColor=e.target.value.toLowerCase();render()});
 $('#neckdef').onclick=()=>{P.neck=NECK_STD;draw()};
-for(const k of ['size','neck','op','zoom','px','py'])$('#'+k).addEventListener('input',e=>{P[k]=+e.target.value;draw()});
+for(const k of ['size','neck','op','zoom','px','py','br','ct','sat'])$('#'+k).addEventListener('input',e=>{P[k]=+e.target.value;draw()});
+$('#adjreset').onclick=()=>{P.br=P.ct=P.sat=0;render()};
 $('#work').innerHTML=WORKS.map(w=>`<button class="opt wk" role="radio" data-w="${w.id}"><img src="picks/${w.id}-1.jpg?v=9" alt=""><span><b>${esc(w.t)}</b>${w.o&&w.o!==w.t?`<small>${esc(w.o)}</small>`:''}</span></button>`).join('');
 on('#work','data-w',v=>{if(v===P.work)return;P.work=v;const w=work();setBg();
   if(w&&w.v){if(P.mode==='video')openTrailer(w);else loadPick(0)}render()});
