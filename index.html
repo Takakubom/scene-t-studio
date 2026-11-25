@@ -111,6 +111,9 @@ main{display:grid;grid-template-columns:minmax(0,1fr) 400px;gap:clamp(24px,4vw,5
 .drop small{font-size:11px;color:var(--mute)}
 .player{background:#000;aspect-ratio:16/9;margin-top:10px}.player video{width:100%;height:100%;object-fit:contain;display:block}
 input[type=range]{width:100%;accent-color:var(--ink);height:30px;margin:0}
+.rng{position:relative;display:block;min-width:0}.rng input{position:relative;z-index:1;display:block}.rng i{position:absolute;top:50%;left:calc(8px + (100% - 16px)*var(--d));width:2px;height:16px;margin:-8px 0 0 -1px;border-radius:1px;background:rgba(255,255,255,.55);pointer-events:none}
+@keyframes snapHit{0%{color:#fff;transform:scale(1.25)}100%{transform:scale(1)}}
+output.hit{animation:snapHit .35s ease-out;display:inline-block}
 .tc{display:flex;justify-content:space-between;font-size:12px;color:var(--mute);font-variant-numeric:tabular-nums;margin-top:-2px}
 .st5{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;margin:8px 0}
 .chip{padding:6px 4px;white-space:nowrap}
@@ -285,15 +288,13 @@ html.locked #gate{display:grid;position:fixed;inset:0;z-index:1000;place-items:c
 
   <aside class="wiz">
     <nav class="stepnav" id="stepnav" aria-label="ステップ">
-      <button data-go="0"><b>STEP 1</b>作品とボディ</button>
-      <button data-go="1"><b>STEP 2</b>シーン</button>
+      <button data-go="0"><b>STEP 1</b>ボディ</button>
+      <button data-go="1"><b>STEP 2</b>作品とシーン</button>
       <button data-go="2"><b>STEP 3</b>大きさ・位置</button>
       <button data-go="3"><b>STEP 4</b>仕上げ</button>
     </nav>
     <div class="panes">
     <section class="pane" data-p="0">
-      <div class="grp">作品</div>
-      <div class="works" id="work" role="radiogroup" aria-label="作品"></div>
       <div class="grp">アイテム</div>
       <div class="opts two" id="items"></div>
       <div class="grp">ボディの色</div>
@@ -302,7 +303,9 @@ html.locked #gate{display:grid;position:fixed;inset:0;z-index:1000;place-items:c
       <div class="opts" id="tsizes" style="grid-template-columns:repeat(5,minmax(0,1fr))"></div>
     </section>
     <section class="pane" data-p="1">
-      <p class="note" style="margin:0 0 12px">コピーライト：<b id="crline" style="font-weight:500;color:var(--ink)"></b>（作品に連動）</p>
+      <div class="grp" style="margin-top:0">作品</div>
+      <div class="works" id="work" role="radiogroup" aria-label="作品"></div>
+      <p class="note" style="margin:8px 0 4px">コピーライト：<b id="crline" style="font-weight:500;color:var(--ink)"></b>（作品に連動）</p>
       <div class="grp">シーンの選び方</div>
       <div class="opts two" id="modes" style="margin-bottom:12px"></div>
       <div id="pickwrap"><div class="picks" id="picks"></div><p class="note" style="margin:6px 0 0">おすすめの4シーンです。ほかの場面にしたいときは「動画を見て決める」へ</p></div>
@@ -616,7 +619,13 @@ $('#capc').addEventListener('click',e=>{const b=e.target.closest('[data-cc]');if
 $('#caphex').addEventListener('input',e=>{let v=e.target.value.trim();if(v&&v[0]!=='#')v='#'+v;if(/^#[0-9a-f]{6}$/i.test(v)){P.capColor=v.toLowerCase();render()}});
 $('#capcolor').addEventListener('input',e=>{P.capColor=e.target.value.toLowerCase();render()});
 $('#neckdef').onclick=()=>{P.neck=NECK_STD;draw()};
-for(const k of ['size','neck','op','zoom','px','py','br','ct','sat'])$('#'+k).addEventListener('input',e=>{P[k]=+e.target.value;draw()});
+/* sliders stick at their standard value: within 4% of it the thumb holds there (a short buzz on phones), and a tick marks the spot */
+const SNAP={size:28,neck:8,op:85,px:50,py:50,br:0,ct:0,sat:0};
+for(const [k,d] of Object.entries(SNAP)){const el=$('#'+k),w=document.createElement('span');w.className='rng';w.style.setProperty('--d',(d-el.min)/(el.max-el.min));el.before(w);w.append(el,document.createElement('i'))}
+for(const k of ['size','neck','op','zoom','px','py','br','ct','sat'])$('#'+k).addEventListener('input',e=>{const el=e.target;let v=+el.value;const d=SNAP[k];
+  if(d!=null){if(Math.abs(v-d)<=(el.max-el.min)*.04){v=d;el.value=d}
+    if(v===d&&P[k]!==d){try{navigator.vibrate&&navigator.vibrate(12)}catch(_){}const o=el.parentNode.nextElementSibling;if(o){o.classList.remove('hit');void o.offsetWidth;o.classList.add('hit')}}}
+  P[k]=v;draw()});
 $('#adjreset').onclick=()=>{P.br=P.ct=P.sat=0;render()};
 $('#work').innerHTML=WORKS.map(w=>`<button class="opt wk" role="radio" data-w="${w.id}"><img src="picks/${w.id}-1.jpg?v=9" alt=""><span><b>${esc(w.t)}</b>${w.o&&w.o!==w.t?`<small>${esc(w.o)}</small>`:''}</span></button>`).join('');
 on('#work','data-w',v=>{if(v===P.work)return;P.work=v;const w=work();setBg();
