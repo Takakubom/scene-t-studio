@@ -330,7 +330,6 @@ html.locked #gate{display:grid;position:fixed;inset:0;z-index:1000;place-items:c
       <div class="row"><span>拡大</span><input type="range" id="zoom" min="100" max="300" step="1"><output id="zoomv"></output></div>
       <div class="row"><span>横</span><input type="range" id="px" min="0" max="100" step="1"><output id="pxv"></output></div>
       <div class="row"><span>縦</span><input type="range" id="py" min="0" max="100" step="1"><output id="pyv"></output></div>
-      <label class="chk"><input type="checkbox" id="trim"> 映像の黒帯（レターボックス）を自動でカット</label>
     </section>
     <section class="pane" data-p="3">
       <div class="grp">仕上げ</div>
@@ -441,6 +440,7 @@ const WORKS=[
 ];
 const work=()=>WORKS.find(w=>w.id===P.work);
 const DEF={item:'long',color:'white',slot:'L',ratio:'169',size:28,sv:2,neck:8,zoom:100,px:50,py:50,trim:true,fin:'color',op:85,opv:5,ccv:2,cv:2,rv:2,work:'curfew',mode:'pick',capColor:'',tsize:'M'};
+/* the letterbox trim is no longer a choice: it is always on */
 let P={...DEF};
 try{const v=JSON.parse(localStorage.getItem('photot-studio'));if(v&&typeof v==='object'){for(const k in DEF)if(typeof v[k]===typeof DEF[k])P[k]=v[k];
   if(v.sv!==2){P.size=28;P.sv=2} /* default print width is now 28cm */
@@ -490,7 +490,7 @@ function bars(cv){
   return {x:l,y:t,w:r-l+1,h:b-t+1};
 }
 function cropRect(sc){
-  const R=ratio().r,a=P.trim?sc.rect:{x:0,y:0,w:sc.cv.width,h:sc.cv.height};
+  const R=ratio().r,a=sc.rect;
   let w0,h0;if(a.w/a.h>R){h0=a.h;w0=h0*R}else{w0=a.w;h0=w0/R}
   const w=w0*100/P.zoom,h=h0*100/P.zoom;
   return {x:a.x+(a.w-w)*P.px/100,y:a.y+(a.h-h)*P.py/100,w,h,a};
@@ -568,7 +568,6 @@ function render(){
    $('#modes').innerHTML=`<button class="opt" data-m="pick" ${pressed(P.mode==='pick')}>おすすめから選ぶ</button><button class="opt" data-m="video" ${pressed(P.mode==='video')}>動画を見て決める</button>`;
    $('#picks').innerHTML=pk?w.picks.map((t,i)=>`<button class="opt pk" data-k="${i}" ${pressed(cur===w.id+'-'+i)} title="${esc(w.t)}${t==null?'':' '+tc(t)}">${i===0?'<span class="pkbadge"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 13.6S2.2 10.1 2.2 6.1A3 3 0 0 1 8 4.6a3 3 0 0 1 5.8 1.5c0 4-5.8 7.5-5.8 7.5z" fill="currentColor"/></svg>監督お気に入り</span>':''}<img src="picks/${w.id}-${i+1}.jpg?v=9" alt="${esc(w.t)}${t==null?'':' '+tc(t)}"></button>`).join(''):''}
   document.querySelectorAll('#work .wk').forEach(b=>b.setAttribute('aria-checked',b.dataset.w===P.work));$('#crline').textContent=credit()||'未登録（プリントには入りません）';
-  $('#trim').checked=P.trim;
   draw();
 }
 function draw(){
@@ -597,7 +596,6 @@ $('#caphex').addEventListener('input',e=>{let v=e.target.value.trim();if(v&&v[0]
 $('#capcolor').addEventListener('input',e=>{P.capColor=e.target.value.toLowerCase();render()});
 $('#neckdef').onclick=()=>{P.neck=NECK_STD;draw()};
 for(const k of ['size','neck','op','zoom','px','py'])$('#'+k).addEventListener('input',e=>{P[k]=+e.target.value;draw()});
-$('#trim').addEventListener('change',e=>{P.trim=e.target.checked;draw()});
 $('#work').innerHTML=WORKS.map(w=>`<button class="opt wk" role="radio" data-w="${w.id}"><img src="picks/${w.id}-1.jpg?v=9" alt=""><span><b>${esc(w.t)}</b>${w.o&&w.o!==w.t?`<small>${esc(w.o)}</small>`:''}</span></button>`).join('');
 on('#work','data-w',v=>{if(v===P.work)return;P.work=v;const w=work();setBg();
   if(w&&w.v){if(P.mode==='video')openTrailer(w);else loadPick(0)}render()});
