@@ -440,9 +440,10 @@ const WORKS=[
   {id:'dishpit',t:'皿洗い',o:'Dish Pit',c:'©Dish Pit',v:'trailers/dishpit.mp4',picks:[4.1,5.0,13.8,25.9]}
 ];
 const work=()=>WORKS.find(w=>w.id===P.work);
-const DEF={item:'long',color:'white',slot:'L',ratio:'169',size:30,neck:8,zoom:100,px:50,py:50,trim:true,fin:'color',op:85,opv:5,ccv:2,cv:2,rv:2,work:'curfew',mode:'pick',capColor:'',tsize:'M'};
+const DEF={item:'long',color:'white',slot:'L',ratio:'169',size:28,sv:2,neck:8,zoom:100,px:50,py:50,trim:true,fin:'color',op:85,opv:5,ccv:2,cv:2,rv:2,work:'curfew',mode:'pick',capColor:'',tsize:'M'};
 let P={...DEF};
 try{const v=JSON.parse(localStorage.getItem('photot-studio'));if(v&&typeof v==='object'){for(const k in DEF)if(typeof v[k]===typeof DEF[k])P[k]=v[k];
+  if(v.sv!==2){P.size=28;P.sv=2} /* default print width is now 28cm */
   if(v.opv!==5){P.op=85;P.opv=5} /* default opacity is now 85% (range 70–100) */
   P.op=Math.min(100,Math.max(70,P.op));
   if(v.ccv!==2){P.capColor='';P.ccv=2} /* copyright colour no longer follows the work: back to the body default */
