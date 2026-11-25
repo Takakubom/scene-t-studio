@@ -906,6 +906,8 @@ addScene(sample(),null,'サンプル',true);setBg();
  const INTRO=2800;let t0=null,ang=0,zf=1,boost=1,loaded=0;
  imgs.forEach(im=>{if(im.complete)loaded++;else im.addEventListener('load',()=>loaded++,{once:true})});
  const intro=now=>{if(still){zf=1;boost=1;cv.style.opacity=1;return}
+   /* behind the password screen the wall waits, so the opening plays right after the password is entered */
+   if(document.documentElement.classList.contains('locked')){t0=null;zf=2.6;boost=0;cv.style.opacity=0;return}
    if(t0===null){if(loaded<pool.length*.6&&now<1800){zf=2.6;boost=0;cv.style.opacity=0;return}t0=now}
    const p=Math.min(1,(now-t0)/INTRO),e=1-Math.pow(1-p,3);
    zf=2.6-1.6*e;boost=1+60*Math.pow(1-p,2.2);cv.style.opacity=Math.min(1,p*5);
