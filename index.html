@@ -436,7 +436,7 @@ const WORKS=[
   {id:'curfew',t:'リッチーとの1日',o:'Curfew',c:'©Curfew',v:'trailers/curfew.mp4',picks:[null,null,null,23.4]},
   {id:'sandwitch',t:'もう一度ここで',o:'The Second Time Around',c:'©The Second Time Around',v:'trailers/sandwitch.mp4',picks:[0.9,null,6.7,null]},
   {id:'stilldark',t:'still dark',c:'©still dark',v:'trailers/stilldark.mp4',picks:[null,null,null,null]},
-  {id:'strange',t:'ストレンジ',o:'Strange',c:'©Strange',v:'trailers/strange.mp4',picks:[6.2,11.3,13.8,5.6]},
+  {id:'strange',t:'ストレンジ',o:'Strange',c:'©Strange',v:'trailers/strange.mp4',picks:[null,null,null,null]},
   {id:'dishpit',t:'皿洗い',o:'Dish Pit',c:'©Dish Pit',v:'trailers/dishpit.mp4',picks:[4.1,5.0,13.8,25.9]}
 ];
 const work=()=>WORKS.find(w=>w.id===P.work);
@@ -565,7 +565,7 @@ function render(){
   {const w=work(),hv=!!(w&&w.v),pk=hv&&P.mode==='pick',cur=scenes[sel]?.key;
    $('#modes').hidden=!hv;$('#pickwrap').hidden=!pk;$('#videowrap').hidden=pk;
    $('#modes').innerHTML=`<button class="opt" data-m="pick" ${pressed(P.mode==='pick')}>おすすめから選ぶ</button><button class="opt" data-m="video" ${pressed(P.mode==='video')}>動画を見て決める</button>`;
-   $('#picks').innerHTML=pk?w.picks.map((t,i)=>`<button class="opt pk" data-k="${i}" ${pressed(cur===w.id+'-'+i)} title="${esc(w.t)}${t==null?'':' '+tc(t)}">${i===0?'<span class="pkbadge"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 13.6S2.2 10.1 2.2 6.1A3 3 0 0 1 8 4.6a3 3 0 0 1 5.8 1.5c0 4-5.8 7.5-5.8 7.5z" fill="currentColor"/></svg>監督お気に入り</span>':''}<img src="picks/${w.id}-${i+1}.jpg?v=8" alt="${esc(w.t)}${t==null?'':' '+tc(t)}"></button>`).join(''):''}
+   $('#picks').innerHTML=pk?w.picks.map((t,i)=>`<button class="opt pk" data-k="${i}" ${pressed(cur===w.id+'-'+i)} title="${esc(w.t)}${t==null?'':' '+tc(t)}">${i===0?'<span class="pkbadge"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 13.6S2.2 10.1 2.2 6.1A3 3 0 0 1 8 4.6a3 3 0 0 1 5.8 1.5c0 4-5.8 7.5-5.8 7.5z" fill="currentColor"/></svg>監督お気に入り</span>':''}<img src="picks/${w.id}-${i+1}.jpg?v=9" alt="${esc(w.t)}${t==null?'':' '+tc(t)}"></button>`).join(''):''}
   document.querySelectorAll('#work .wk').forEach(b=>b.setAttribute('aria-checked',b.dataset.w===P.work));$('#crline').textContent=credit()||'未登録（プリントには入りません）';
   $('#trim').checked=P.trim;
   draw();
@@ -597,7 +597,7 @@ $('#capcolor').addEventListener('input',e=>{P.capColor=e.target.value.toLowerCas
 $('#neckdef').onclick=()=>{P.neck=NECK_STD;draw()};
 for(const k of ['size','neck','op','zoom','px','py'])$('#'+k).addEventListener('input',e=>{P[k]=+e.target.value;draw()});
 $('#trim').addEventListener('change',e=>{P.trim=e.target.checked;draw()});
-$('#work').innerHTML=WORKS.map(w=>`<button class="opt wk" role="radio" data-w="${w.id}"><img src="picks/${w.id}-1.jpg?v=8" alt=""><span><b>${esc(w.t)}</b>${w.o&&w.o!==w.t?`<small>${esc(w.o)}</small>`:''}</span></button>`).join('');
+$('#work').innerHTML=WORKS.map(w=>`<button class="opt wk" role="radio" data-w="${w.id}"><img src="picks/${w.id}-1.jpg?v=9" alt=""><span><b>${esc(w.t)}</b>${w.o&&w.o!==w.t?`<small>${esc(w.o)}</small>`:''}</span></button>`).join('');
 on('#work','data-w',v=>{if(v===P.work)return;P.work=v;const w=work();setBg();
   if(w&&w.v){if(P.mode==='video')openTrailer(w);else loadPick(0)}render()});
 on('#modes','data-m',v=>{P.mode=v;const w=work();if(v==='video'&&w&&w.v&&trailer!==w.v)openTrailer(w);render()});
@@ -606,7 +606,7 @@ function loadPick(i){
   const w=work();if(!w||!w.picks)return;const key=w.id+'-'+i,ex=scenes.findIndex(s=>s.key===key);
   if(ex>=0){sel=ex;render();return}
   const im=new Image();im.onload=()=>{const c=document.createElement('canvas');c.width=im.naturalWidth;c.height=im.naturalHeight;c.getContext('2d').drawImage(im,0,0);addScene(c,w.picks[i],w.t,false,key)};
-  im.src=`picks/${w.id}-${i+1}.jpg?v=8`;
+  im.src=`picks/${w.id}-${i+1}.jpg?v=9`;
 }
 $('#copy').onclick=async()=>{try{await navigator.clipboard.writeText(summary());$('#msg').textContent='内容をコピーしました'}catch(e){$('#msg').textContent='コピーできませんでした'}};
 
@@ -782,7 +782,7 @@ addScene(sample(),null,'サンプル',true);setBg();
 {const fv=$('#fv'),stage=$('#fvstage'),cv=$('#fvgl');
  /* every recommended still + extra frames pulled from each trailer */
  const FVT={"curfew": [2.65, 10.4, 14.4, 15.15, 18.9, 24.4], "sandwitch": [0.65, 3.65, 10.65, 14.4, 17.4, 18.15, 19.15, 20.65, 22.15], "dishpit": [0.9, 1.65, 5.4, 9.65, 10.4, 11.65, 13.4, 14.9, 29.4], "stilldark": [0.65, 2.65, 8.15, 9.65, 10.4, 12.65, 13.4, 14.4, 16.4, 17.15], "strange": [8.4, 11.9, 13.65, 16.15, 17.4, 18.4, 19.4, 20.4]};
- const pool=[...WORKS.flatMap(w=>w.picks.map((t,i)=>({w,t,pick:i,src:`picks/${w.id}-${i+1}.jpg?v=8`}))),
+ const pool=[...WORKS.flatMap(w=>w.picks.map((t,i)=>({w,t,pick:i,src:`picks/${w.id}-${i+1}.jpg?v=9`}))),
    ...WORKS.flatMap(w=>(FVT[w.id]||[]).map((t,i)=>({w,t,pick:-1,src:`fvpics/${w.id}-${i}.jpg`})))];
  let seed=11;const rnd=()=>(seed=(seed*16807)%2147483647)/2147483647;
  /* ---- card sprites in one atlas ---- */
