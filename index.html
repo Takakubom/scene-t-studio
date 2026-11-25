@@ -280,7 +280,6 @@ html.locked #gate{display:grid;position:fixed;inset:0;z-index:1000;place-items:c
       <canvas id="print" aria-label="プリント（ドラッグで画角を動かせます）"></canvas>
       <div id="ghost" hidden>シーンを<br>切り取る</div>
     </div>
-    <div class="hint" id="hint">写真をドラッグで画角調整</div>
     <div class="hbtns"><button id="undo" aria-label="元に戻す" title="元に戻す（⌘Z / Ctrl+Z）" disabled><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M5.5 3.5 2.5 6.5l3 3M3 6.5h6.5a4 4 0 0 1 0 8H7" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button><button id="redo" aria-label="やり直す" title="やり直す（⇧⌘Z / Ctrl+Y）" disabled><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M10.5 3.5l3 3-3 3M13 6.5H6.5a4 4 0 0 0 0 8H9" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button><button class="reset" id="tosample" title="作品・ボディ・大きさなどを最初のサンプルに戻します"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8a5 5 0 1 0 1.5-3.6M3 2.5v3h3" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>サンプルに戻す</button></div>
     <button class="imgbtn" id="imgbtn">イメージを見る</button>
     <button class="zoombtn" id="zoombtn" aria-label="拡大して見る" title="拡大して見る"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="7" cy="7" r="4.6" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M10.4 10.4 14 14M5 7h4M7 5v4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></button>
@@ -599,8 +598,8 @@ function draw(){
   $('#zoomv').textContent=P.zoom+'%';$('#opv').textContent=P.op+'%';$('#print').style.opacity=P.op/100;$('#sizev').textContent=Math.round(slot().w*CM*2)/2+'cm';$('#sizenote').textContent=`${sizeTxt()}・首元から${P.neck}cm（標準${NECK_STD}cm）。ロンT Mサイズ（身幅52cm）を基準にした目安です。`;$('#pxv').textContent=P.px;$('#pyv').textContent=P.py;
   const s=slot(),pr=$('#print'),gh=$('#ghost'),sc=scenes[sel];
   const pos=el=>{el.style.left=(TOX+(s.cx-s.w/2)*TS)/W*100+'%';el.style.top=(TOY+s.top*TS)/H*100+'%';el.style.width=s.w*TS/W*100+'%'};
-  if(sc){const cv=makePrint(sc,s.w*2);pr.width=cv.width;pr.height=cv.height;pr.getContext('2d').drawImage(cv,0,0);pos(pr);pr.hidden=false;gh.hidden=true;$('#hint').hidden=false}
-  else{pr.hidden=true;pos(gh);gh.style.height=s.w*TS/ratio().r/H*100+'%';gh.hidden=false;$('#hint').hidden=true}
+  if(sc){const cv=makePrint(sc,s.w*2);pr.width=cv.width;pr.height=cv.height;pr.getContext('2d').drawImage(cv,0,0);pos(pr);pr.hidden=false;gh.hidden=true}
+  else{pr.hidden=true;pos(gh);gh.style.height=s.w*TS/ratio().r/H*100+'%';gh.hidden=false}
   $('#export').disabled=!sc;$('#next').disabled=stepI===NSTEP-1&&!sc;
   save();
 }
