@@ -746,9 +746,7 @@ $('#doneclose').onclick=()=>$('#dlg').close();
    The original print's corners mark a 30×35cm frame whose top sits 7cm below the collar; the new print is placed
    in that frame by cm and bent with it (bilinear, drawn as a triangle mesh). */
 /* the wearing view uses the 半袖T model shot for every item (ロンT shows it with a note) */
-/* scale checked against the model's torso (≈375px across the chest = 身幅52cm, so ≈7.2px/cm, the same proportion as the flat tee);
-   the quad is the old print's corners, so its cm size is set from that scale and its top stays 9.7cm under the collar */
-const MQ={tl:[377,531],tr:[675,519],br:[728,848],bl:[432,879],w:41.4,h:48.3,neck:9.7};
+const MQ={tl:[377,531],tr:[675,519],br:[728,848],bl:[432,879],w:30,h:35,neck:7};
 const mPt=(u,v)=>{const s=u/MQ.w,t=v/MQ.h,f=(a,b,c,d)=>(1-s)*(1-t)*a+s*(1-t)*b+s*t*c+(1-s)*t*d;
   return [f(MQ.tl[0],MQ.tr[0],MQ.br[0],MQ.bl[0]),f(MQ.tl[1],MQ.tr[1],MQ.br[1],MQ.bl[1])]};
 function tri(g,img,s0,s1,s2,d0,d1,d2){
