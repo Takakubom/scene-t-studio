@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="robots" content="noindex,nofollow">
 <script>/* demo-site gate: on the public demo host the page stays covered until the password is entered once per browser */
-(function(){var demo=/github\.io$/.test(location.hostname);try{if(demo&&localStorage.getItem('stg')!=='e7b69c7f6d8d805ee89ceadb0851d0317657a36e88ee06d38cbfbb362a986b9f')document.documentElement.classList.add('locked')}catch(e){if(demo)document.documentElement.classList.add('locked')}})();</script>
+(function(){var demo=/github\.io$/.test(location.hostname);try{if(demo&&localStorage.getItem('stg2')!=='e7b69c7f6d8d805ee89ceadb0851d0317657a36e88ee06d38cbfbb362a986b9f')document.documentElement.classList.add('locked')}catch(e){if(demo)document.documentElement.classList.add('locked')}})();</script>
 <title>Scene T Studio</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -253,7 +253,7 @@ html.locked #gate{display:grid;position:fixed;inset:0;z-index:1000;place-items:c
 <input type="password" id="gpw" aria-label="パスワード" autofocus><button type="submit">入る</button><p class="gerr" id="gerr" aria-live="polite"></p></div></form>
 <script>document.getElementById('gate').addEventListener('submit',async function(e){e.preventDefault();
   var v=document.getElementById('gpw').value,b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(v)),h=[].map.call(new Uint8Array(b),function(x){return x.toString(16).padStart(2,'0')}).join('');
-  if(h==='e7b69c7f6d8d805ee89ceadb0851d0317657a36e88ee06d38cbfbb362a986b9f'){try{localStorage.setItem('stg',h)}catch(_){}location.reload()}else{document.getElementById('gerr').textContent='パスワードが違います';document.getElementById('gpw').select()}});</script>
+  if(h==='e7b69c7f6d8d805ee89ceadb0851d0317657a36e88ee06d38cbfbb362a986b9f'){try{localStorage.setItem('stg2',h)}catch(_){}location.reload()}else{document.getElementById('gerr').textContent='パスワードが違います';document.getElementById('gpw').select()}});</script>
 <video id="pagebg" muted loop playsinline autoplay preload="auto" aria-hidden="true"></video><div class="veil"></div>
 <section class="fv" id="fv" aria-label="Scene T Studio">
   <div class="fv-stage" id="fvstage"><canvas id="fvgl"></canvas></div>
